@@ -2,6 +2,7 @@ name: upgrader
 description: Flutter package for prompting users to upgrade when there is a newer version of the app in the store.
 version: 13.0.0
 homepage: https://github.com/larryaasen/upgrader
+test
 
 environment:
   sdk: '>=3.5.0 <4.0.0'
