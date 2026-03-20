@@ -1,6 +1,6 @@
 # Upgrader
 
-[![codecov](https://codecov.io/gh/larryaasen/upgrader/branch/master/graph/badge.svg)](https://app.codecov.io/gh/larryaasen/upgrader)
+[![codecov](https://codecov.io/gh/larryaasen/upgrader/branch/main/graph/badge.svg)](https://app.codecov.io/gh/larryaasen/upgrader)
 [![pub package](https://img.shields.io/pub/v/upgrader.svg)](https://pub.dartlang.org/packages/upgrader)
 [![GitHub Stars](https://img.shields.io/github/stars/larryaasen/upgrader.svg)](https://github.com/larryaasen/upgrader/stargazers)
 <a href="https://www.buymeacoffee.com/larryaasen">
@@ -26,11 +26,14 @@ will become more likely that users on other app stores need to be nagged about u
 | Platform | Automatically Supported? | Appcast Supported? |
 | --- | --- | --- |
 | ANDROID | &#9989; Yes | &#9989; Yes |
+| FUCHSIA | &#10060; No | &#9989; Yes |
 | IOS | &#9989; Yes | &#9989; Yes |
 | LINUX | &#10060; No | &#9989; Yes |
 | MACOS | &#10060; No | &#9989; Yes |
 | WEB | &#10060; No | &#9989; Yes |
 | WINDOWS | &#10060; No | &#9989; Yes |
+
+**Note:** This package relies on scraping public Play Store pages for Android. It does *not* use the native Android In-App Updates API or Huawei AppGallery API.
 
 ## Widgets
 The widgets come in two flavors: alert or card. The [UpgradeAlert](#alert-example) widget is used to display the
@@ -49,6 +52,11 @@ Tapping the UPDATE NOW button takes the user to the App Store (iOS) or Google Pl
 Just wrap your home widget in the `UpgradeAlert` widget, and it will handle the rest. Make sure `UpgradeAlert`
 is below `MaterialApp` in the widget tree.
 ```dart
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(const MyApp());
+}
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -57,10 +65,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Upgrader Example',
       home: UpgradeAlert(
-          child: Scaffold(
-        appBar: AppBar(title: Text('Upgrader Example')),
-        body: Center(child: Text('Checking...')),
-      )),
+        child: Scaffold(
+          appBar: AppBar(title: const Text('Upgrader Example')),
+          body: const Center(child: Text('Checking...')),
+        ),
+      ),
     );
   }
 }
@@ -112,12 +121,12 @@ For [appcast](#appcast)), the release notes are taken from the description field
 ## Customization
 
 The alert can be customized by changing the `DialogTheme` on the `MaterialApp`, or by overriding methods in the `UpgradeAlert` class. See these examples for more details:
-- [example/lib/main-alert-theme.dart](example/lib/main-alert-theme.dart)
-- [example/lib/main-custom-alert.dart](example/lib/main-custom-alert.dart)
+- [example/lib/main_alert_theme.dart](example/lib/main_alert_theme.dart)
+- [example/lib/main_custom_alert.dart](example/lib/main_custom_alert.dart)
 
 The card can be customized by changing the `CardTheme` on the `MaterialApp`, or by overriding methods in the `UpgradeCard` class. See these examples for more details:
-- [example/lib/main-card-theme.dart](example/lib/main-card-theme.dart)
-- [example/lib/main-custom-card.dart](example/lib/main-custom-card.dart)
+- [example/lib/main_card_theme.dart](example/lib/main_card_theme.dart)
+- [example/lib/main_custom_card.dart](example/lib/main_custom_card.dart)
 
 Here are the custom parameters for `UpgradeAlert`:
 
@@ -128,6 +137,7 @@ Here are the custom parameters for `UpgradeAlert`:
 * onLater: called when the later button is tapped, defaults to ```null```
 * onUpdate: called when the update button is tapped, defaults to ```null```
 * shouldPopScope: called to determine if the dialog blocks the current route from being popped, which defaults to ```null```
+* showPrompt: hide or show Prompt label on dialog, which defaults to ```true```
 * showIgnore: hide or show Ignore button, which defaults to ```true```
 * showLater: hide or show Later button, which defaults to ```true```
 * showReleaseNotes: hide or show release notes, which defaults to ```true```
@@ -135,11 +145,12 @@ Here are the custom parameters for `UpgradeAlert`:
 Here are the custom parameters for `UpgradeCard`:
 
 * margin: The empty space that surrounds the card, defaults to ```null```
-* maxLines: An optional maximum number of lines for the text to span, wrapping if necessary, defaults to ```null```
+* maxLines: An optional maximum number of lines for the text to span, wrapping if necessary, defaults to ```15```
 * onIgnore: called when the ignore button is tapped, defaults to ```null```
 * onLater: called when the later button is tapped, defaults to ```null```
 * onUpdate: called when the update button is tapped, defaults to ```null```
-* overflow: How visual overflow should be handled, defaults to ```null```
+* overflow: How visual overflow should be handled, defaults to ```TextOverflow.ellipsis```
+* showPrompt: hide or show Prompt label on dialog, which defaults to ```true```
 * showIgnore: hide or show Ignore button, which defaults to ```true```
 * showLater: hide or show Later button, which defaults to ```true```
 * showReleaseNotes: hide or show release notes, which defaults to ```true```
@@ -157,7 +168,6 @@ The `Upgrader` class can be customized by setting parameters in the constructor,
 * messages: optional localized messages used for display in `upgrader`
 * minAppVersion: the minimum app version supported by this app. Earlier versions of this app will be forced to update to the current version. It should be a valid version string like this: ```2.0.13```. Overrides any minimum app version from UpgraderStore. Defaults to ```null```.
 * storeController: a controller that provides the store details for each platform, defaults to `UpgraderStoreController()`.
-* upgraderDevice: an abstraction of the device_info details which is used for the OS version, defaults to `UpgraderDevice()`.
 * upgraderOS: information on which OS this code is running on, defaults to `UpgraderOS()`.
 * willDisplayUpgrade: called when ```upgrader``` determines that an upgrade may
 or may not be displayed, defaults to ```null```
@@ -165,8 +175,8 @@ or may not be displayed, defaults to ```null```
 The  `UpgraderStoreController` class is a controller that provides the store details
 for each platform.
 * onAndroid: defaults to `UpgraderPlayStore()` that extends `UpgraderStore`.
-* onFuchsia: defaults to `UpgraderAppStore()` that extends `UpgraderStore`.
-* oniOS: defaults to `null`.
+* onFuchsia: defaults to `null`.
+* oniOS: defaults to `UpgraderAppStore()` that extends `UpgraderStore`.
 * onLinux: defaults to `null`.
 * onMacOS: defaults to `null`.
 * onWeb: defaults to `null`.
@@ -174,11 +184,12 @@ for each platform.
 
 To change the `UpgraderStore` for a platform, replace the platform with a
 different store. Here is an example of using an Appcast on iOS.
-```
+```dart
+const appcastURL = 'https://raw.githubusercontent.com/larryaasen/upgrader/main/test/testappcast.xml';
 final upgrader = Upgrader(
   storeController: UpgraderStoreController(
     onAndroid: () => UpgraderPlayStore(),
-    oniOS: () => UpgraderAppcastStore(appcastURL: appcastURL),
+    oniOS: () => UpgraderAppcastStore(appcastURL: appcastURL, osVersion: Version(0, 0, 0)),
   ),
 );
 ```
@@ -227,7 +238,7 @@ description field.
 When using GoRouter (package go_router) with upgrader, you may need to provide
 a navigatorKey to the ```UpgradeAlert``` widget so that the correct route
 context is used. Below is part of the code you will need for this. Also,
-checkout the [example/lib/main-gorouter.dart](example/lib/main-gorouter.dart) example for a more complete example.
+check out the [example/lib/main_gorouter.dart](example/lib/main_gorouter.dart) example for a more complete example.
 
 ```dart
   @override
@@ -238,9 +249,34 @@ checkout the [example/lib/main-gorouter.dart](example/lib/main-gorouter.dart) ex
       builder: (context, child) {
         return UpgradeAlert(
           navigatorKey: routerConfig.routerDelegate.navigatorKey,
-          child: child ?? Text('child'),
+          child: child ?? const Text('child'),
         );
       },
+    );
+  }
+```
+
+## Using CupertinoApp
+
+When an app is using ```CupertinoApp``` instead of `MaterialApp`, you can now use the `UpgradeAlert` widget
+without errors. Using the `UpgradeCard` widget does not work with `CupertinoApp` because it uses the material
+`Card` widget.
+
+Example:
+```dart
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoApp(
+      title: 'Upgrader Example',
+      home: CupertinoPageScaffold(
+        navigationBar: const CupertinoNavigationBar(
+          middle: Text('Upgrader CupertinoApp Example'),
+        ),
+        child: UpgradeAlert(
+          dialogStyle: UpgradeDialogStyle.cupertino,
+          child: const Center(child: Text('Checking...')),
+        ),
+      ),
     );
   }
 ```
@@ -250,7 +286,7 @@ checkout the [example/lib/main-gorouter.dart](example/lib/main-gorouter.dart) ex
 When using the ```UpgradeAlert``` widget, the Android back button will not
 dismiss the alert dialog by default. To allow the back button to dismiss the
 dialog, use ```shouldPopScope``` and return true like this:
-```
+```dart
 UpgradeAlert(shouldPopScope: () => true);
 ```
 
@@ -303,27 +339,41 @@ The class [UpgraderAppcastStore](lib/src/upgrade_store_controller.dart), in this
 Flutter package, is used by `upgrader` to download app details from an appcast.
 
 ### Appcast Example
-This is an Appcast example for Android.
+This is an Appcast example for Android and iOS.
 ```dart
-static const appcastURL =
-    'https://raw.githubusercontent.com/larryaasen/upgrader/master/test/testappcast.xml';
-final upgrader = Upgrader(
-  storeController: UpgraderStoreController(
-    onAndroid: () => UpgraderAppcastStore(appcastURL: appcastURL),
-  ),
-);
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(const MyApp());
+}
 
-@override
-Widget build(BuildContext context) {
-  return MaterialApp(
-    title: 'Upgrader Example',
-    home: Scaffold(
-        appBar: AppBar(title: Text('Upgrader Appcast Example')),
-        body: UpgradeAlert(
-          upgrader: upgrader,
-          child: Center(child: Text('Checking...')),
-        )),
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  static const appcastURL =
+      'https://raw.githubusercontent.com/larryaasen/upgrader/main/test/testappcast.xml';
+
+  // Pass the actual OS version for accurate Appcast item filtering.
+  // See example/lib/main_appcast.dart for how to retrieve the OS version
+  // using the device_info_plus package.
+  static final upgrader = Upgrader(
+    storeController: UpgraderStoreController(
+      onAndroid: () => UpgraderAppcastStore(appcastURL: appcastURL, osVersion: Version(0, 0, 0)),
+      oniOS: () => UpgraderAppcastStore(appcastURL: appcastURL, osVersion: Version(0, 0, 0)),
+    ),
   );
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Upgrader Example',
+      home: Scaffold(
+          appBar: AppBar(title: const Text('Upgrader Appcast Example')),
+          body: UpgradeAlert(
+            upgrader: upgrader,
+            child: const Center(child: Text('Checking...')),
+          )),
+    );
+  }
 }
 ```
 
@@ -346,8 +396,21 @@ Widget build(BuildContext context) {
 ### Appcast Class
 ```dart
 final appcast = Appcast();
-final items = await appcast.parseAppcastItemsFromUri('https://raw.githubusercontent.com/larryaasen/upgrader/master/test/testappcast.xml');
+final items = await appcast.parseAppcastItemsFromUri('https://raw.githubusercontent.com/larryaasen/upgrader/main/test/testappcast.xml');
 final bestItem = appcast.bestItem();
+```
+
+### Appcast Critical Update
+You can force an update (hiding the Ignore and Later buttons) by adding the `sparkle:criticalUpdate` tag to the item in your Appcast XML.
+
+```xml
+<item>
+    <title>Version 1.15.0</title>
+    <sparkle:tags>
+        <sparkle:criticalUpdate />
+    </sparkle:tags>
+    ...
+</item>
 ```
 
 ## Customizing the strings
@@ -371,7 +434,7 @@ UpgradeAlert(Upgrader(messages: MyUpgraderMessages()));
 
 ## Language localization
 
-The strings displayed in `upgrader` are already localized in 35 languages. New languages will be
+The strings displayed in `upgrader` are already localized in 39 languages. New languages will be
 supported in the future with minor updates. It also supports right to left languages.
 
 Languages supported:
@@ -381,6 +444,7 @@ Languages supported:
 * Chinese ('zh')
 * Danish ('da')
 * Dutch ('nl')
+* Estonian ('et')
 * Filipino ('fil')
 * French ('fr')
 * German ('de')
@@ -403,15 +467,17 @@ Languages supported:
 * Polish ('pl')
 * Pashto ('ps')
 * Portuguese ('pt')
+* Romanian ('ro')
 * Russian ('ru')
 * Spanish ('es')
+* Slovenian ('sl')
 * Swedish ('sv')
 * Tamil ('ta')
 * Telugu ('te')
 * Turkish ('tr')
 * Ukrainian ('uk')
+* Uzbek ('uz')
 * Vietnamese ('vi')
-
 
 The `upgrader` package can be supplied with additional languages in your code by extending the `UpgraderMessages` class
 to provide custom values.
@@ -469,22 +535,31 @@ digit (MAJOR), it converts it to a 3 digit version: MAJOR.0.0, and for versions 
 only use 2 digits (MAJOR.MINOR), it converts it to a 3 digit version: MAJOR.MINOR.0, to
 be compliant with Semantic Versioning.
 
+**Important:** The version string in your store listing (Google Play / App Store) *must* be a valid semantic version (e.g. `1.2.3` or `1.2.3+4`). Formats like `1.2.3(4)` are not valid and will cause a `FormatException`.
+
 ## Examples
 
-There are [plenty of examples](https://github.com/larryaasen/upgrader/tree/master/example/lib) that cover various different situations that may
+There are [plenty of examples](https://github.com/larryaasen/upgrader/tree/main/example/lib) that cover various different situations that may
 help you customize the `upgrader` experience for your app. Check these out.
 
 |  |  |  |
 | --- | --- | --- |
 | main.dart | main_alert_again.dart | main_alert_theme.dart |
 | main_appcast.dart | main_card.dart | main_card_theme.dart |
-| main_cupertino.dart | main_custom_alert.dart | main_custom_card.dart |
-| main_dialog_key.dart | main_driver.dart | main_gorouter.dart |
-| main_localized_rtl.dart | main_macos.dart | main_messages.dart |
-| main_min_app_version.dart | main_multiple.dart | main_stateful.dart |
-| main_subclass.dart |  |  |
+| main_card_updated.dart | main_cupertino.dart | main_cupertinoapp.dart |
+| main_custom_alert.dart | main_custom_card.dart | main_dialog_key.dart |
+| main_driver.dart | main_gorouter.dart | main_localized_rtl.dart |
+| main_macos.dart | main_messages.dart | main_min_app_version.dart |
+| main_multiple.dart | main_stateful.dart | main_subclass.dart |
 
-## Tapping UPDATE NOW button issue on Android
+## Troubleshooting
+
+### Updates not showing?
+1. **Google Play Closed/Internal Testing:** This package relies on scraping the *public* store page. If your app is in a Closed or Internal testing track, the page is not public, and `upgrader` cannot see the version. Use an **Appcast** for testing these pre-production builds.
+2. **Cache/Ignored:** If you previously tapped "Ignore" or "Later", the alert will be suppressed. You can reset this state by calling `await Upgrader.clearSavedSettings();` during development only.
+3. **Debug Mode:** By default, logs are hidden. Enable `debugLogging: true` in the `Upgrader` constructor to see exactly what the package is parsing.
+
+### Tapping UPDATE NOW button issue on Android
 
 Seeing an error similar to this on Android after tapping the UPDATE NOW button?
 ```

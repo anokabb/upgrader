@@ -16,10 +16,11 @@ class MyApp extends StatelessWidget {
   MyApp({super.key});
 
   static const appcastURL =
-      'https://raw.githubusercontent.com/larryaasen/upgrader/master/test/testappcast_macos.xml';
+      'https://raw.githubusercontent.com/larryaasen/upgrader/main/test/testappcast_macos.xml';
   final upgrader = Upgrader(
     storeController: UpgraderStoreController(
-        onMacOS: () => UpgraderAppcastStore(appcastURL: appcastURL)),
+        onMacOS: () =>
+            UpgraderAppcastStore(appcastURL: appcastURL, osVersion: '0.0.0')),
     debugLogging: true,
   );
 

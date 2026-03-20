@@ -1,4 +1,4 @@
-// Copyright (c) 2024 Larry Aasen. All rights reserved.
+// Copyright (c) 2024-2025 Larry Aasen. All rights reserved.
 
 import 'dart:async';
 
@@ -153,10 +153,15 @@ class UpgraderAppcastStore extends UpgraderStore {
   UpgraderAppcastStore({
     required this.appcastURL,
     this.appcast,
+    this.osVersion,
   });
 
   final String appcastURL;
   final Appcast? appcast;
+
+  /// The operating system version string (e.g. `'14.0.0'`).
+  /// When `null` or unparseable, defaults to `Version(0, 0, 0)`.
+  final String? osVersion;
 
   @override
   Future<UpgraderVersionInfo> getVersionInfo(
@@ -169,12 +174,25 @@ class UpgraderAppcastStore extends UpgraderStore {
     bool? isCriticalUpdate;
     String? releaseNotes;
 
+    Version parsedOsVersion;
+    try {
+      parsedOsVersion = osVersion?.isNotEmpty == true
+          ? Version.parse(osVersion!)
+          : Version(0, 0, 0);
+    } catch (e) {
+      parsedOsVersion = Version(0, 0, 0);
+      if (state.debugLogging) {
+        print(
+            'upgrader: UpgraderAppcastStore: could not parse osVersion "$osVersion": $e');
+      }
+    }
+
     final localAppcast = appcast ??
         Appcast(
             client: state.client,
             clientHeaders: state.clientHeaders,
-            upgraderDevice: state.upgraderDevice,
-            upgraderOS: state.upgraderOS);
+            upgraderOS: state.upgraderOS,
+            osVersion: parsedOsVersion);
     await localAppcast.parseAppcastItemsFromUri(appcastURL);
     if (state.debugLogging) {
       var count = localAppcast.items == null ? 0 : localAppcast.items!.length;
