@@ -18,11 +18,10 @@ class MyApp extends StatelessWidget {
   MyApp({super.key});
 
   static const appcastURL =
-      'https://raw.githubusercontent.com/larryaasen/upgrader/main/test/testappcast.xml';
+      'https://raw.githubusercontent.com/larryaasen/upgrader/master/test/testappcast.xml';
   final upgrader = Upgrader(
     storeController: UpgraderStoreController(
-        onAndroid: () =>
-            UpgraderAppcastStore(appcastURL: appcastURL, osVersion: '0.0.0')),
+        onAndroid: () => UpgraderAppcastStore(appcastURL: appcastURL)),
     debugLogging: true,
     minAppVersion: '1.1.0',
   );
