@@ -129,17 +129,6 @@ void main() {
       expect(MockUpgraderOS(windows: true).current, 'windows');
     });
 
-    test('MockUpgraderOS currentTypeFormatted', () async {
-      expect(MockUpgraderOS().currentTypeFormatted, 'Android');
-      expect(MockUpgraderOS(android: true).currentTypeFormatted, 'Android');
-      expect(MockUpgraderOS(fuchsia: true).currentTypeFormatted, 'Fuchsia');
-      expect(MockUpgraderOS(ios: true).currentTypeFormatted, 'iOS');
-      expect(MockUpgraderOS(linux: true).currentTypeFormatted, 'Linux');
-      expect(MockUpgraderOS(macos: true).currentTypeFormatted, 'macOS');
-      expect(MockUpgraderOS(web: true).currentTypeFormatted, 'Web');
-      expect(MockUpgraderOS(windows: true).currentTypeFormatted, 'Windows');
-    });
-
     test('MockUpgraderOS currentOSType', () async {
       expect(MockUpgraderOS().currentOSType, UpgraderOSType.android);
       expect(
